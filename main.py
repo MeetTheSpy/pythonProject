@@ -27,7 +27,7 @@ class Board:
                                   (self.cell_size - 2, self.cell_size - 2)))
 
     def load_level(filename):
-        filename = 'levels/' + filename
+        filename = 'levels\\' + filename
         with open(filename, 'r') as mapFile:
             level_map = [line.strip() for line in mapFile]
 
