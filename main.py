@@ -36,7 +36,6 @@ class Board:
         return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
-
 if __name__ == '__main__':
     pygame.init()
     pygame.display.set_caption('Соединяй точки')
