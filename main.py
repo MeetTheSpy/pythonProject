@@ -2,6 +2,7 @@ import pygame
 import os
 import sys
 
+print(1)
 class Board:
     def __init__(self, width, height):
         self.width = width
