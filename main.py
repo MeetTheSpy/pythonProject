@@ -1,10 +1,11 @@
 import pygame
 import os
 import sys
+import time
 
 
 class Board:
-    def __init__(self, width, height):
+    def __init__(self, width, height, fname):
         self.width = width
         self.height = height
         self.board = [[0] * width for _ in range(height)]
@@ -13,14 +14,12 @@ class Board:
         self.cell_size = 3
 
         # поле кругов
-        self.circles = self.load_level('level1.txt')
+        self.circles = self.load_level(fname)
         self.lines = [[0] * len(self.circles) for _ in range(len(self.circles))]
-        print(*self.circles, sep='\n')
         colors = set([x for row in self.circles for x in row if x != 0])
         self.ways = {}
         for c in colors:
             self.ways[c] = []
-        print(self.ways)
 
     def set_view(self, left, top, cell_size):
         self.left = left
@@ -111,54 +110,73 @@ if __name__ == '__main__':
     pygame.display.set_caption('Соединяй точки')
     size = width, height = 800, 600
     screen = pygame.display.set_mode(size)
-
-    board = Board(5, 5)
-    board.set_view(190, 70, 80)
-
     running = True
-    drawing = False
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
 
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                pos = event.pos
-                if board.get_cell(pos):
-                    i, j = board.get_cell(pos)
-                    cur_color = board.circles[i][j]
-                    if board.circles[i][j] != 0 and board.lines[i][j] == 0:
-                        drawing = True
-                        board.lines[i][j] = cur_color
-                        if not board.ways[cur_color]:
-                            board.ways[cur_color].append((i,j))
- #
-            #                   if board.lines[i][j] == cur_color and (i, j) in board.ways[cur_color]:
- #                       k = board.ways[cur_color].index((i, j))
- #                       board.ways[cur_color] = board.ways[cur_color][:k + 1]
+    n = 10 # количество уровней
 
-            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                if not drawing:
-                    board.clear_lines(cur_color)
-                    board.ways[cur_color] = []
+    for level in range(n):
+        if not running:
+            break
 
-                drawing = False
+        fname = 'level' + str(level + 1) +'.txt'
+        board = Board(5, 5, fname)
+        board.set_view(190, 70, 80)
 
-            if event.type == pygame.MOUSEMOTION and drawing:
-                pos = event.pos
-                if board.get_cell(pos):
-                    i, j = board.get_cell(pos)
-                    if board.circles[i][j] == 0 and board.lines[i][j] == 0 or board.circles[i][j] == cur_color:
-                        if board.ways[cur_color][-1] != 'end':
-                            i0, j0 = board.ways[cur_color][-1]
-                            if abs(i - i0) == 1 and j == j0 or abs(j - j0) == 1 and i == i0:
-                                board.ways[cur_color].append((i, j))
-                                board.lines[i][j] = cur_color
-                                if board.circles[i][j] == cur_color:
-                                    board.ways[cur_color].append('end')
 
-        screen.fill((0, 0, 0))
-        board.render(screen)
-        pygame.display.flip()
+        drawing = False
+        while running:
+
+            # проверка на окончание раунда
+            ok = True
+            for row in board.lines:
+                for x in row:
+                    if x == 0:
+                        ok = False
+            if ok:
+                time.sleep(2)
+                break
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    pos = event.pos
+                    if board.get_cell(pos):
+                        i, j = board.get_cell(pos)
+                        cur_color = board.circles[i][j]
+                        if board.circles[i][j] != 0 and board.lines[i][j] == 0:
+                            drawing = True
+                            board.lines[i][j] = cur_color
+                            if not board.ways[cur_color]:
+                                board.ways[cur_color].append((i,j))
+     #                   if board.lines[i][j] == cur_color and (i, j) in board.ways[cur_color]:
+     #                       k = board.ways[cur_color].index((i, j))
+     #                       board.ways[cur_color] = board.ways[cur_color][:k + 1]
+
+                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                    if not drawing:
+                        board.clear_lines(cur_color)
+                        board.ways[cur_color] = []
+
+                    drawing = False
+
+                if event.type == pygame.MOUSEMOTION and drawing:
+                    pos = event.pos
+                    if board.get_cell(pos):
+                        i, j = board.get_cell(pos)
+                        if board.circles[i][j] == 0 and board.lines[i][j] == 0 or board.circles[i][j] == cur_color:
+                            if board.ways[cur_color][-1] != 'end':
+                                i0, j0 = board.ways[cur_color][-1]
+                                if abs(i - i0) == 1 and j == j0 or abs(j - j0) == 1 and i == i0:
+                                    board.ways[cur_color].append((i, j))
+                                    board.lines[i][j] = cur_color
+                                    if board.circles[i][j] == cur_color:
+                                        board.ways[cur_color].append('end')
+
+            screen.fill((0, 0, 0))
+            board.render(screen)
+            pygame.display.flip()
 
     pygame.quit()
+
